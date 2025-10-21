@@ -3,6 +3,9 @@ import { NextAuthOptions } from "next-auth"
 import NextAuth from "next-auth/next"
 import KeycloakProvider from "next-auth/providers/keycloak"
 
+// アプリケーションのベースURL（環境変数から読み込み）
+const APP_BASE_URL = process.env.NEXTAUTH_URL!
+
 // NextAuth.jsの設定オプション
 export const authOptions: NextAuthOptions = {
   // 認証プロバイダーの設定
@@ -36,6 +39,24 @@ export const authOptions: NextAuthOptions = {
       session.idToken = token.idToken as string          // IDトークンをセッションに追加
       session.user = token.user as any                   // ユーザー情報をセッションに追加
       return session
+    },
+    // リダイレクト先を環境変数から読み込み
+    async redirect({ url, baseUrl }) {
+      // 認証成功後のリダイレクト先を環境変数から取得
+      const redirectUrl = APP_BASE_URL  // NEXTAUTH_URLから読み込まれた値を使用
+      
+      // 相対URLの場合は環境変数で指定されたベースURLと結合
+      if (url.startsWith("/")) {
+        return `${redirectUrl}${url}`
+      }
+      
+      // 同一ドメインの場合はそのまま
+      if (new URL(url).origin === redirectUrl) {
+        return url
+      }
+      
+      // デフォルト: 環境変数で指定されたURLにリダイレクト
+      return redirectUrl
     },
   },
   // セッション管理の設定
