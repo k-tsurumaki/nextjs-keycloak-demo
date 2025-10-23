@@ -1,0 +1,15 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.4
+    container_name: keycloak
+    ports:
+      - "18080:8080"
+      - "18443:8443"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: password
+    command:
+      - "start-dev"
+      - "--import-realm"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
